@@ -1,89 +1,112 @@
-import json
-import random
-import time
-from datetime import datetime
-import os
-import requests  # 💡 빠져있던 import 추가
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Generate fake facility-event JSON logs and POST them to an API server.
+- Uses an event-code mapping table (code ➜ device, desc, status)
+- Writes every event to ./logs/facility_events.json (one-line JSON)
+- Sends each event to API_URL  (default: http://localhost:5000/log)
+"""
 
-# ./logs/facility_events.json 경로 만들고 로그 누적 기록할 준비
-LOG_DIR = "./logs"
+import json, random, time, os
+from datetime import datetime
+import requests
+
+# ───────────────────────────────────────────────
+# 1. 이벤트 코드 매핑 테이블
+# ───────────────────────────────────────────────
+EVENT_MAP = {
+    # 통신
+    101: {"device": "CCTV",          "event_desc": "Video signal lost",        "status": "Critical"},
+    102: {"device": "CCTV",          "event_desc": "Blurred image",            "status": "Warning"},
+    103: {"device": "Monitor",       "event_desc": "Display failure",          "status": "Warning"},
+    104: {"device": "Boarding Gate", "event_desc": "Gate not responding",      "status": "Critical"},
+    105: {"device": "Boarding Gate", "event_desc": "Gate motor overheating",   "status": "Warning"},
+    106: {"device": "Monitor",       "event_desc": "Resolution mismatch",      "status": "Info"},
+    # 소방
+    201: {"device": "Fire Alarm",    "event_desc": "Fire detected",            "status": "Critical"},
+    202: {"device": "Fire Alarm",    "event_desc": "Battery low",              "status": "Warning"},
+    203: {"device": "Sprinkler",     "event_desc": "Water leakage detected",   "status": "Warning"},
+    204: {"device": "Fire Door",     "event_desc": "Door not closed properly", "status": "Critical"},
+    205: {"device": "Fire Alarm",    "event_desc": "Test mode enabled",        "status": "Info"},
+    # 전기
+    301: {"device": "Elevator",      "event_desc": "Emergency stop activated", "status": "Critical"},
+    302: {"device": "Escalator",     "event_desc": "Vibration detected",       "status": "Warning"},
+    303: {"device": "Screen Door",   "event_desc": "Door open failure",        "status": "Critical"},
+    304: {"device": "Screen Door",   "event_desc": "Sensor malfunction",       "status": "Warning"},
+    305: {"device": "Elevator",      "event_desc": "Maintenance in progress",  "status": "Info"},
+}
+
+# 역사 위치 샘플
+STATIONS = [
+    "Seoul Station Line 1",
+    "City Hall Station Line 1",
+    "Jonggak Station Line 1",
+    "Dongmyo Station Line 1",
+    "Cheongnyangni Station Line 1",
+    "Hoegi Station Line 1",
+    "Gunja Station Line 1",
+    "Yongdap Station Line 1",
+    "Guro Station Line 1",
+    "Geumcheon-gu Office Station Line 1",
+    "Anyang Station Line 1",
+    "Suwon Station Line 1"
+]
+
+# ───────────────────────────────────────────────
+# 2. 파일/디렉터리 및 API URL 설정
+# ───────────────────────────────────────────────
+LOG_DIR  = "./logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_FILE = os.path.join(LOG_DIR, "facility_events.json")
 
-# '설비 종류, 발생 이벤트, 역사 위치, 상태값(정상/경고/위급)' 리스트로 정의
-facilities = {
-    "CCTV": [
-        "Video signal lost",
-        "Blurred image",
-        "Intrusion detected",
-        "Low storage space"
-    ],
-    "Screen Door": [
-        "Door not closed",
-        "Sensor not responding",
-        "Obstruction detected",
-        "Response delay"
-    ],
-    "Air Conditioner": [
-        "Temperature too high",
-        "High humidity detected",
-        "Filter replacement needed",
-        "Power off"
-    ],
-    "Fire System": [
-        "Fire detected",
-        "Sprinkler malfunction",
-        "Low battery on receiver",
-        "Alarm test not executed"
-    ]
-}
+API_URL  = os.getenv("API_URL", "http://localhost:5000/log")   # 필요 시 환경변수로 변경
 
-locations = [
-    "Gangnam Station Line 2",
-    "Yeouido Station Line 9",
-    "Gwanghwamun Station Line 5",
-    "Euljiro 3-ga Station Line 3"
-]
+# ───────────────────────────────────────────────
+# 3. 랜덤 이벤트 생성 함수 (상태 확률 조정 포함)
+# ───────────────────────────────────────────────
+def generate_event() -> dict:
+    code = random.choice(list(EVENT_MAP.keys()))
+    meta = EVENT_MAP[code]
 
-statuses = ["Normal", "Warning", "Critical"]
+    # ① 상태 확률 풀: N 90% / W 5% / C 5%
+    status_pool = ["Normal"] * 90 + ["Warning"] * 5 + ["Critical"] * 5
 
-API_URL = "http://localhost:5000/log"  # ✅ Flask 서버 포트와 일치시켜야 함
-
-# 랜덤으로 설비,이벤트,위치,상태,타임스탬프를 뽑아 하나의 JSON 딕셔너리를 생성함
-def generate_event():
-    device = random.choice(list(facilities.keys()))
-    event_type = random.choice(facilities[device])
-    location = random.choice(locations) + f", Exit {random.randint(1, 8)}"
-    # 이벤트 내용에 "detected"나 "lost"가 포함되면 상태를 "Critical"로 고정
-    status = "Critical" if "detected" in event_type or "lost" in event_type else random.choice(statuses)
+    # ② 'detected' 또는 'lost' 가 설명에 있으면 Critical, 아니면 확률 추출
+    status = (
+        "Critical"
+        if any(k in meta["event_desc"].lower() for k in ("detected", "lost"))
+        else random.choice(status_pool)
+    )
 
     return {
-        "device": device,
-        "event_type": event_type,
-        "status": status,
-        "location": location,
-        "timestamp": datetime.now().isoformat()
+        "timestamp"   : datetime.utcnow().isoformat(timespec="seconds"),
+        "location"    : f"{random.choice(STATIONS)}, Exit {random.randint(1, 8)}",
+        "device"      : meta["device"],
+        "event_type"  : code,
+        "event_desc"  : meta["event_desc"],
+        "status"      : status,
+        "equipment_id": f"{meta['device'][:3].upper()}-{code}"
     }
 
-# generate_event()로 만든 로그를 화면에 출력 후 파일에 한 줄(JSON 방식)로 append
-# requests.post()로 API URL(http://localhost:5000/log)에 전송하고 결과 코드를 출력
-# 예외 시 오류룰 콘솔에 남김
-def write_log():
+# ───────────────────────────────────────────────
+# 4. 로그 생성 → 파일 저장 → API POST
+# ───────────────────────────────────────────────
+def write_and_send():
     event = generate_event()
-    print("📦 Generated log:", event)
+    print(" 📦  Generated:", event)
 
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    with open(LOG_FILE, "a", encoding="utf-8") as fp:
+        fp.write(json.dumps(event, ensure_ascii=False) + "\n")
 
     try:
         res = requests.post(API_URL, json=event, timeout=3)
-        print("📨 Sent to API server:", res.status_code)
-    except Exception as e:
-        print("❌ Failed to send to API server:", e)
+        print(" 📤  Sent to API:", res.status_code)
+    except Exception as exc:
+        print(" ❌  Send failed:", exc)
 
-# 1-5초 간격 마다 위 과정을 반복해 지속적으로 장애 로그를 발행
+# ───────────────────────────────────────────────
 if __name__ == "__main__":
-    print("✅ Running facility event log generator...\n")
+    print("✅ Dummy log generator running… (Ctrl+C to stop)")
     while True:
-        write_log()
+        write_and_send()
         time.sleep(random.randint(1, 5))
