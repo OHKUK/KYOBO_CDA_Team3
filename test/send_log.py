@@ -7,9 +7,11 @@ Generate fake facility-event JSON logs and POST them to an API server.
 - Sends each event to API_URL  (default: http://localhost:5000/log)
 """
 
-import json, random, time, os
-from datetime import datetime
+import json, random, time, os, calendar
+from datetime import datetime, timezone, timedelta
 import requests
+
+KST = timezone(timedelta(hours=9))
 
 # ───────────────────────────────────────────────
 # 1. 이벤트 코드 매핑 테이블
@@ -78,8 +80,21 @@ def generate_event() -> dict:
         else random.choice(status_pool)
     )
 
+    # ───────────────────────────────────────────────
+    # ▶ 한국(KST) 기준 2025년 랜덤 월·일·시각 생성
+    # ───────────────────────────────────────────────
+    year  = 2025
+    month = random.randint(1, 12)
+    day   = random.randint(1, calendar.monthrange(year, month)[1])
+    hour, minute, second = (random.randint(0, 23),
+                            random.randint(0, 59),
+                            random.randint(0, 59))
+    timestamp = datetime(year, month, day, hour, minute, second, tzinfo=KST) \
+            .isoformat(timespec="seconds")
+    # ───────────────────────────────────────────────
+
     return {
-        "timestamp"   : datetime.utcnow().isoformat(timespec="seconds"),
+        "timestamp"   : timestamp,
         "location"    : f"{random.choice(STATIONS)}, Exit {random.randint(1, 8)}",
         "device"      : meta["device"],
         "event_type"  : code,
