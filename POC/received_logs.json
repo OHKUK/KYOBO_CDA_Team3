@@ -1,0 +1,4 @@
+{"device": "Air Conditioner", "event_type": "High humidity detected", "status": "Critical", "location": "Gwanghwamun Station Line 5, Exit 6", "timestamp": "2025-07-08T10:56:33.424802"}
+{"device": "Fire System", "event_type": "Sprinkler malfunction", "status": "Critical", "location": "Euljiro 3-ga Station Line 3, Exit 2", "timestamp": "2025-07-08T10:56:38.507517"}
+{"device": "Screen Door", "event_type": "Door not closed", "status": "Normal", "location": "Gwanghwamun Station Line 5, Exit 3", "timestamp": "2025-07-08T10:56:45.569994"}
+{"device": "CCTV", "event_type": "Low storage space", "status": "Critical", "location": "Gangnam Station Line 2, Exit 1", "timestamp": "2025-07-08T10:56:49.659338"}
