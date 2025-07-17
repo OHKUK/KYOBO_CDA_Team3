@@ -3,16 +3,19 @@ from flask_cors import CORS
 import json
 import socket
 import mysql.connector
+from dotenv import load_dotenv
+import os
+load_dotenv(dotenv_path='/app/.env')
 
 app = Flask(__name__)
 CORS(app) 
 # ⭐️ 컨테이너 환경에서는 서비스 이름으로 통신해야 합니다.
-LOGSTASH_HOST = 'logstash'
+LOGSTASH_HOST = os.getenv("LOGSTASH_HOST")
 LOGSTASH_PORT = 50000
 
-MYSQL_HOST = 'mysql-db'
-MYSQL_USER = 'subway_user'
-MYSQL_PASSWORD = 'subway_pass'
+MYSQL_HOST = os.getenv("MYSQL_HOST")
+MYSQL_USER = os.getenv("MYSQL_USER")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = 'subway_system'
 
 @app.route("/log", methods=["POST"])

@@ -124,7 +124,8 @@ export default {
     }
   },
   mounted() {
-    const socket = new WebSocket('ws://192.168.56.1:8001/ws');
+    const wsUrl = process.env.VUE_APP_WS_URL;
+    const socket = new WebSocket(`${wsUrl}`);
     socket.onopen = () => console.log('✅ WebSocket 연결됨');
     socket.onmessage = (event) => {
       const parsed = JSON.parse(event.data);

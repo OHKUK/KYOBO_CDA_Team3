@@ -28,8 +28,9 @@ export default {
   },
   methods: {
     async login() {
+      const apiUrl = process.env.VUE_APP_API_URL;
       try {
-        const res = await axios.post('http://192.168.56.1:5000/api/login', {
+        const res = await axios.post(`${apiUrl}/api/login`, {
           username: this.username,
           password: this.password
         });

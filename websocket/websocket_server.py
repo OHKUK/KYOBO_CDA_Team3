@@ -3,7 +3,9 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union, List, Any
 import mysql.connector
-
+from dotenv import load_dotenv
+import os
+load_dotenv(dotenv_path='/app/.env')
 app = FastAPI()
 
 app.add_middleware(
@@ -17,9 +19,9 @@ app.add_middleware(
 clients = []
 
 DB_CONFIG = {
-    "host": "mysql-db",
-    "user": "subway_user",
-    "password": "subway_pass",
+    "host": os.getenv("MYSQL_HOST"),
+    "user": os.getenv("MYSQL_USER"),
+    "password": os.getenv("MYSQL_PASSWORD"),
     "database": "subway_system"
 }
 
