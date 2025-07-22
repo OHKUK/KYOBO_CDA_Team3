@@ -5,7 +5,6 @@ env:
     AWS_REGION: ap-northeast-2
     FRONTEND_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/frontend
     
-
 phases:
   install:
     commands:

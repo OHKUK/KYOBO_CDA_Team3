@@ -14,7 +14,7 @@ phases:
     commands:
       - echo ✅ ECR 로그인...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $BACKEND_REPO
-      - export IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - export IMAGE_URI=${BACKEND_REPO}:latest
       - echo 🔐 Secrets Manager에서 환경파일 가져오기...
       - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./backend/.env
 
@@ -29,7 +29,7 @@ phases:
       - echo 🚀 ECR에 이미지 푸시
       - docker push $BACKEND_REPO:latest
       - echo Build completed on `date`
-      - printf '[{"name":"sgmetro-api-service","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
+      - printf '[{"name":"api","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
 
 artifacts:
   files:
