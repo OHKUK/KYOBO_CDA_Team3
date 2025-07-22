@@ -12,7 +12,7 @@ env:
 phases:
   install:
     runtime-versions:
-      docker: 20
+      - echo 'Skip runtime-versions, use privileged mode instead'
 
   pre_build:
     commands:
