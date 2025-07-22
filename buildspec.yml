@@ -23,6 +23,8 @@ phases:
       - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./backend/.env
       - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./websocket/.env
       - aws secretsmanager get-secret-value --secret-id sgmetro_frontend --query SecretString --output text > ./frontend/.env.production
+      - echo "📄 .env.production 내용:"
+      - cat ./frontend/.env.production
 
   build:
     commands:
