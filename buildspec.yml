@@ -11,8 +11,8 @@ env:
 
 phases:
   install:
-    runtime-versions:
-      - echo 'Skip runtime-versions, use privileged mode instead'
+    commands:
+      - echo '💡 Docker 권한은 Privileged 모드로 제공되므로 runtime-versions 필요 없음'
 
   pre_build:
     commands:
