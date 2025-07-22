@@ -1,0 +1,60 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-northeast-2
+    BACKEND_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/backend
+    FRONTEND_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/frontend
+    KIBANA_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/kibana
+    LOGSTASH_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/logstash
+    WEBSOCKET_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/websocket
+
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+
+  pre_build:
+    commands:
+      - echo ✅ ECR 로그인...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $BACKEND_REPO
+
+      - echo 🔐 Secrets Manager에서 환경파일 가져오기...
+      - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./backend/.env
+      - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./websocket/.env
+      - aws secretsmanager get-secret-value --secret-id sgmetro_frontend --query SecretString --output text > ./frontend/.env.production
+
+  build:
+    commands:
+      - echo 🛠 backend 이미지 빌드
+      - docker build -t backend ./backend
+      - docker tag backend:latest $BACKEND_REPO:latest
+
+      - echo 🛠 frontend 이미지 빌드
+      - docker build -t frontend ./frontend
+      - docker tag frontend:latest $FRONTEND_REPO:latest
+
+      - echo 🛠 kibana 이미지 빌드
+      - docker build -t kibana ./kibana
+      - docker tag kibana:latest $KIBANA_REPO:latest
+
+      - echo 🛠 logstash 이미지 빌드
+      - docker build -t logstash ./logstash
+      - docker tag logstash:latest $LOGSTASH_REPO:latest
+
+      - echo 🛠 websocket 이미지 빌드
+      - docker build -t websocket ./websocket
+      - docker tag websocket:latest $WEBSOCKET_REPO:latest
+
+  post_build:
+    commands:
+      - echo 🚀 ECR에 이미지 푸시
+      - docker push $BACKEND_REPO:latest
+      - docker push $FRONTEND_REPO:latest
+      - docker push $KIBANA_REPO:latest
+      - docker push $LOGSTASH_REPO:latest
+      - docker push $WEBSOCKET_REPO:latest
+
+artifacts:
+  files:
+    - '**/*'
