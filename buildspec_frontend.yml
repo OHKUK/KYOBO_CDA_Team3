@@ -31,7 +31,7 @@ phases:
       - echo 🚀 ECR에 이미지 푸시
       - docker push $FRONTEND_REPO:latest
       - echo Build completed on `date`
-      - printf '[{"name":"sgmetro-frontend-service","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
+      - printf '[{"name":"frontend","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
 
 artifacts:
   files:
