@@ -17,7 +17,7 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $BACKEND_REPO
 
       - echo 🔐 Secrets Manager에서 환경파일 가져오기...
-      - aws secretsmanager get-secret-value --secret-id sgmetro_frontend --query SecretString --output text > ./frontend/.env.production
+      - echo "$(aws secretsmanager get-secret-value --secret-id sgmetro_frontend --query SecretString --output text)" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > ./frontend/.env.production
       - echo "📄 .env.production 내용:"
       - cat ./frontend/.env.production
 
