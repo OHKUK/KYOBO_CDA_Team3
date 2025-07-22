@@ -30,7 +30,9 @@ phases:
     commands:
       - echo 🚀 ECR에 이미지 푸시
       - docker push $WEBSOCKET_REPO:latest
-      
+      - echo Build completed on `date`
+      - printf '[{"name":"sgmetro-websocket-service","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
+
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json

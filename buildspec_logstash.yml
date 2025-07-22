@@ -25,7 +25,9 @@ phases:
     commands:
       - echo 🚀 ECR에 이미지 푸시
       - docker push $LOGSTASH_REPO:latest
-      
+      - echo Build completed on `date`
+      - printf '[{"name":"sgmetro-logstash-service","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
+
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json

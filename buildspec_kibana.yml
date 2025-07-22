@@ -26,8 +26,9 @@ phases:
     commands:
       - echo 🚀 ECR에 이미지 푸시
       - docker push $KIBANA_REPO:latest
+      - echo Build completed on `date`
+      - printf '[{"name":"sgmetro-kibana-service","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
 
-      
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json
