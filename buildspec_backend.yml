@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-northeast-2
+    BACKEND_REPO: 548334873638.dkr.ecr.ap-northeast-2.amazonaws.com/backend
+
+phases:
+  install:
+    commands:
+      - echo '💡 Docker 권한은 Privileged 모드로 제공되므로 runtime-versions 필요 없음'
+
+  pre_build:
+    commands:
+      - echo ✅ ECR 로그인...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $BACKEND_REPO
+
+      - echo 🔐 Secrets Manager에서 환경파일 가져오기...
+      - aws secretsmanager get-secret-value --secret-id sgmetro --query SecretString --output text > ./backend/.env
+
+  build:
+    commands:
+      - echo 🛠 backend 이미지 빌드
+      - docker build -t backend ./backend
+      - docker tag backend:latest $BACKEND_REPO:latest
+
+  post_build:
+    commands:
+      - echo 🚀 ECR에 이미지 푸시
+      - docker push $BACKEND_REPO:latest
+      
+artifacts:
+  files:
+    - '**/*'
