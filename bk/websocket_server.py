@@ -2,7 +2,6 @@ import json
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union, List, Any
-from fastapi.responses import JSONResponse
 import mysql.connector
 from dotenv import load_dotenv
 import os
@@ -94,9 +93,8 @@ async def push_log(data: Union[dict, List[Any]]):
 # ✅ 여기에 추가하세요
 @app.get("/")
 async def health_check():
-    return JSONResponse(status_code=200, content={"message": "OK"})
+    return {"message": "OK"}
 
-# 웹소켓 서버의 진입 파일 끝에 추가
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=False)
+#if __name__ == "__main__":
+#    app.run(host="0.0.0.0", port=5000)
+

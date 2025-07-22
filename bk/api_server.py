@@ -18,7 +18,7 @@ MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = 'subway_system'
 
-@app.route("/api/log", methods=["POST"])
+@app.route("/log", methods=["POST"])
 def receive_and_forward_log():
     data = request.get_json()
     if not data:
@@ -86,11 +86,9 @@ def login():
         if conn and conn.is_connected():
             conn.close()
 
-# ✅ 여기 추가
 @app.route("/", methods=["GET"])
 def health_check():
     return "OK", 200
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -62,10 +62,10 @@ export default {
       socket: null,
       departmentMap: {
         // 'control' 항목은 로직 처리를 위해 반드시 필요합니다.
-        'control': { label: '종합', url: 'http://www.sgmetro.click/kibana/goto/073cb4d0-6693-11f0-824b-f90246e724d9', team: null },
-        'fire': { label: '소방', url: 'http://www.sgmetro.click/kibana/goto/74a4c860-6692-11f0-824b-f90246e724d9', team: 'fire_safety_team' },
-        'elec': { label: '전기', url: 'http://www.sgmetro.click/kibana/goto/814c3940-6692-11f0-824b-f90246e724d9', team: 'electrical_team' },
-        'tele': { label: '통신', url: 'http://www.sgmetro.click/kibana/goto/898ef070-6692-11f0-824b-f90246e724d9', team: 'communication_team' },
+        'control': { label: '종합', url: 'http://192.168.56.1:5601/goto/OVERALL_DASHBOARD_ID', team: null },
+        'fire': { label: '소방', url: 'http://192.168.56.1:5601/goto/dc89fc00-6086-11f0-a9cc-c34cbb40e6d7', team: 'fire_safety_team' },
+        'elec': { label: '전기', url: 'http://192.168.56.1:5601/goto/e7742c80-6086-11f0-a9cc-c34cbb40e6d7', team: 'electrical_team' },
+        'tele': { label: '통신', url: 'http://192.168.56.1:5601/goto/f211c3a0-6086-11f0-a9cc-c34cbb40e6d7', team: 'communication_team' },
       }
     };
   },
