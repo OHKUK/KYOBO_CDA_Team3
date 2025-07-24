@@ -132,6 +132,118 @@ def search_alerts():
             conn.close()
 
 
+@app.route("/api/alerts/check", methods=["POST"])
+def mark_alert_checked():
+    data = request.get_json()
+    device_id = data.get("device_id")
+    timestamp = data.get("timestamp")
+
+    if not device_id or not timestamp:
+        return jsonify({"message": "필수 값 누락"}), 400
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
+        cursor = conn.cursor()
+
+        update_sql = """
+            UPDATE alerts
+            SET `check` = '확인', checked_at = %s
+            WHERE device_id = %s AND detected_at = %s
+        """
+
+        # ISO 형식 타임스탬프 처리 (예: 2024-07-24T12:34:56.000Z)
+        try:
+            if "Z" in timestamp:
+                timestamp = timestamp.replace("Z", "+00:00")
+            dt_obj = datetime.fromisoformat(timestamp)
+        except Exception as e:
+            print(f"❌ timestamp 파싱 실패: {e}")
+            return jsonify({"message": "timestamp 형식 오류"}), 400
+
+        cursor.execute(update_sql, (dt_obj, device_id, dt_obj))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"message": "해당 알람 없음"}), 404
+
+        return jsonify({"message": "확인 처리 완료"}), 200
+
+    except mysql.connector.Error as err:
+        print(f"❌ DB 오류: {err}")
+        return jsonify({"message": "DB 오류"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+@app.route("/api/alerts/bulk-check", methods=["POST"])
+def mark_bulk_alerts_checked():
+    data = request.get_json()
+
+    if not isinstance(data, list) or not data:
+        return jsonify({"message": "리스트 형식의 요청 데이터가 필요합니다."}), 400
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
+        cursor = conn.cursor()
+
+        update_sql = """
+            UPDATE alerts
+            SET `check` = '확인', checked_at = %s
+            WHERE device_id = %s AND detected_at = %s
+        """
+
+        from datetime import datetime
+
+        success_count = 0
+        for alert in data:
+            device_id = alert.get("device_id")
+            timestamp = alert.get("timestamp")
+
+            if not device_id or not timestamp:
+                continue
+
+            try:
+                if "Z" in timestamp:
+                    timestamp = timestamp.replace("Z", "+00:00")
+                dt_obj = datetime.fromisoformat(timestamp)
+                cursor.execute(update_sql, (dt_obj, device_id, dt_obj))
+                success_count += cursor.rowcount
+            except Exception as e:
+                print(f"❌ 오류 발생 - device_id: {device_id}, timestamp: {timestamp}, error: {e}")
+                continue
+
+        conn.commit()
+
+        return jsonify({"message": f"{success_count}건 확인 처리 완료"}), 200
+
+    except mysql.connector.Error as err:
+        print(f"❌ DB 오류: {err}")
+        return jsonify({"message": "DB 오류"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+
 # ✅ 여기 추가
 @app.route("/", methods=["GET"])
 def health_check():

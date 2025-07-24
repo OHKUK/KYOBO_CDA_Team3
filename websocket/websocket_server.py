@@ -64,12 +64,14 @@ async def push_log(data: Union[dict, List[Any]]):
             alert_type_val = event.get("status")          # '상태' -> 'status'
             message_val = event.get("event_desc")     # '이벤트' -> 'event_desc'
             detected_at_val = event.get("timestamp")
+            check_val = "체크안함"
+            
 
             sql = """
-                INSERT INTO alerts (device_id, alert_type, message, detected_at)
+                INSERT INTO alerts (device_id, alert_type, message, detected_at, check)
                 VALUES (%s, %s, %s, %s)
             """
-            values = (device_id_val, alert_type_val, message_val, detected_at_val)
+            values = (device_id_val, alert_type_val, message_val, detected_at_val, check_val)
             cursor.execute(sql, values)
             saved_count += cursor.rowcount
 
