@@ -1,8 +1,5 @@
 <template>
   <div class="search-container">
-    <!-- 🔙 돌아가기 버튼 -->
-    <button @click="$emit('goBack')" class="back-button">← 돌아가기</button>
-
     <h2>🔍 알림 검색</h2>
 
     <!-- 검색 조건 -->
