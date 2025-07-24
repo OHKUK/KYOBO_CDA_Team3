@@ -86,6 +86,52 @@ def login():
         if conn and conn.is_connected():
             conn.close()
 
+@app.route("/api/alerts", methods=["GET"])
+def search_alerts():
+    keyword = request.args.get("keyword", "")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT id, device_id, alert_type, message, detected_at
+            FROM alerts
+            WHERE message LIKE %s
+        """
+        params = [f"%{keyword}%"]
+
+        if start_date and end_date:
+            query += " AND DATE(detected_at) BETWEEN %s AND %s"
+            params += [start_date, end_date]
+
+        query += " ORDER BY detected_at DESC LIMIT 50"
+
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+
+        return jsonify(results), 200
+
+    except mysql.connector.Error as err:
+        print(f"❌ 검색 중 DB 오류: {err}")
+        return jsonify({"message": "DB 오류 발생"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+
 # ✅ 여기 추가
 @app.route("/", methods=["GET"])
 def health_check():

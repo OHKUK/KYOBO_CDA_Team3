@@ -39,6 +39,11 @@
         </ul>
       </section>
 
+      <!-- ✅ 검색 뷰 (SearchView 컴포넌트 사용) -->
+      <section class="dashboard" v-else-if="category === 'search'">
+        <SearchView />
+      </section>
+
       <!-- Kibana 대시보드 -->
       <section class="dashboard" v-else>
         <iframe
@@ -53,7 +58,12 @@
 </template>
 
 <script>
+import SearchView from './Search.vue'; // ✅ 검색 컴포넌트 import
+
 export default {
+  components: {
+    SearchView, // ✅ 컴포넌트 등록
+  },
   data() {
     const clontrolUrl = process.env.VUE_APP_KIBANA_CONTROL;
     const fireUrl = process.env.VUE_APP_KIBANA_FIRE;
@@ -77,19 +87,22 @@ export default {
     // 로그인한 사용자의 부서에 따라 메뉴를 동적으로 생성
     menuItems() {
       const items = [{ name: null, label: "실시간 알림" }];
-      
+
       if (this.userDepartment === 'control') {
         // 'control' 사용자는 '종합 관제'를 제외한 모든 부서의 대시보드 메뉴를 봅니다.
         Object.keys(this.departmentMap).forEach(deptKey => {
            if (deptKey !== 'control') { // 'control' 메뉴는 건너뜁니다.
-             items.push({ name: deptKey, label: this.departmentMap[deptKey].label });
-           }
+            items.push({ name: deptKey, label: this.departmentMap[deptKey].label });
+          }
         });
       } else if (this.departmentMap[this.userDepartment]) {
         // 다른 부서 사용자는 자신의 대시보드 메뉴만 봅니다.
         const deptInfo = this.departmentMap[this.userDepartment];
         items.push({ name: this.userDepartment, label: deptInfo.label });
       }
+
+      items.push({ name: 'search', label: '🔍 검색' }); // ✅ 검색 메뉴 추가
+
       return items;
     },
     // 부서에 따라 실시간 알림을 필터링
@@ -104,6 +117,7 @@ export default {
       return [];
     },
     topbarTitle() {
+      if (this.category === 'search') return '🔍 알림 검색'; // ✅ 검색 화면 제목 처리
       if (this.category) {
         return this.departmentMap[this.category]?.label || "대시보드";
       }
