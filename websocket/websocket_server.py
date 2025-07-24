@@ -69,7 +69,7 @@ async def push_log(data: Union[dict, List[Any]]):
 
             sql = """
                 INSERT INTO alerts (device_id, alert_type, message, detected_at, `check`)
-                VALUES (%s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s)
             """
             values = (device_id_val, alert_type_val, message_val, detected_at_val, check_val)
             cursor.execute(sql, values)
