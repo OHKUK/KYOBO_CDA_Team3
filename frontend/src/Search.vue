@@ -132,8 +132,7 @@ export default {
         const res = await axios.post(`${apiUrl}/api/check`, {
           id: alert.id,
         });
-        await this.searchAlerts(); // ✅ 다시 불러오기 (여기 추가!)
-
+        // ✅ 다시 불러오기 (여기 추가!)
         if (res.status === 200) {
           alert.check = "확인"; // ✅ 상태 직접 갱신
         }
@@ -164,7 +163,7 @@ export default {
         const res = await axios.post(`${apiUrl}/alerts/bulk-check`, payload); // ✅ 서버에 여러 개 전송
 
         if (res.status === 200) {
-          await this.searchAlerts(); // ✅ 성공 시 화면 갱신
+          // ✅ 성공 시 화면 갱신
           this.selectedAlerts.forEach((alert) => {
             alert.check = "확인";
           });
