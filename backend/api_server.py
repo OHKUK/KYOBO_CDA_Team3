@@ -105,7 +105,7 @@ def search_alerts():
         cursor = conn.cursor(dictionary=True)
 
         query = """
-            SELECT id, device_id, alert_type, message, detected_at
+            SELECT id, device_id, alert_type, message, detected_at, `check`, checked_at
             FROM alerts
             WHERE message LIKE %s
         """
