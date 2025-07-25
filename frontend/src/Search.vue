@@ -129,7 +129,7 @@ export default {
     async markAsChecked(alert) {
       try {
         const apiUrl = process.env.VUE_APP_API_URL;
-        const res = await axios.post(`${apiUrl}/api/alerts/check`, {
+        const res = await axios.post(`${apiUrl}/api/check`, {
           id: alert.id,
         });
 
@@ -160,10 +160,7 @@ export default {
 
         const apiUrl = process.env.VUE_APP_API_URL;
 
-        const res = await axios.post(
-          `${apiUrl}/api/alerts/bulk-check`,
-          payload
-        ); // ✅ 서버에 여러 개 전송
+        const res = await axios.post(`${apiUrl}/alerts/bulk-check`, payload); // ✅ 서버에 여러 개 전송
 
         if (res.status === 200) {
           // ✅ 성공 시 화면 갱신

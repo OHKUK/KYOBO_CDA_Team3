@@ -132,7 +132,7 @@ def search_alerts():
             conn.close()
 
 
-@app.route("/api/alerts/check", methods=["POST"])
+@app.route("/api/check", methods=["POST"])
 def mark_alert_checked():
     data = request.get_json()
     alert_id  = data.get("id")
@@ -174,7 +174,7 @@ def mark_alert_checked():
         if conn and conn.is_connected():
             conn.close()
 
-@app.route("/api/alerts/bulk-check", methods=["POST"])
+@app.route("/api/bulk-check", methods=["POST"])
 def mark_bulk_alerts_checked():
     data = request.get_json()
 
