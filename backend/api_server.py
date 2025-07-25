@@ -227,6 +227,47 @@ def mark_bulk_alerts_checked():
         if conn and conn.is_connected():
             conn.close()
 
+@app.route("/api/resolve", methods=["POST"])
+def mark_alert_resolved():
+    data = request.get_json()
+    alert_id = data.get("id")
+
+    if not alert_id:
+        return jsonify({"message": "필수 값 누락"}), 400
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
+        cursor = conn.cursor()
+
+        update_sql = """
+            UPDATE alerts
+            SET `check` = '해결', resolved_at = NOW()
+            WHERE id = %s
+        """
+        cursor.execute(update_sql, (alert_id,))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"message": "해당 알람 없음"}), 404
+
+        return jsonify({"message": "해결 처리 완료"}), 200
+
+    except mysql.connector.Error as err:
+        print(f"❌ DB 오류: {err}")
+        return jsonify({"message": "DB 오류"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
 
 # ✅ 여기 추가
 @app.route("/", methods=["GET"])

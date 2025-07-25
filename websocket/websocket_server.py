@@ -62,7 +62,7 @@ async def push_log(data: Union[dict, List[Any]]):
             alert_type_val = event.get("status")          # '상태' -> 'status'
             message_val = event.get("event_desc")     # '이벤트' -> 'event_desc'
             detected_at_val = event.get("timestamp")
-            check_val = "체크안함"
+            check_val = "미확인"
             
 
             sql = """

@@ -71,8 +71,19 @@
           <td>{{ alert.message }}</td>
           <td>{{ formatDate(alert.detected_at) }}</td>
           <td>
-            <span v-if="alert.check === '확인'">✔ 확인됨</span>
-            <button v-else @click="markAsChecked(alert)">확인</button>
+            <button
+              v-if="alert.check === '미확인'"
+              @click="markAsChecked(alert.id)"
+            >
+              확인
+            </button>
+            <button
+              v-else-if="alert.check === '확인'"
+              @click="markAsResolved(alert.id)"
+            >
+              해결
+            </button>
+            <span v-else>해결됨</span>
           </td>
           <!-- ✅ 추가 -->
         </tr>
@@ -139,6 +150,17 @@ export default {
       } catch (err) {
         console.error("❌ 확인 실패:", err);
         alert("확인 처리 중 오류가 발생했습니다.");
+      }
+    },
+    async markAsResolved(id) {
+      try {
+        await axios.post(`${process.env.VUE_APP_API_URL}/api/resolve`, {
+          id: id,
+        });
+        await this.searchAlerts();
+      } catch (err) {
+        console.error(err);
+        alert("해결 처리 중 오류 발생");
       }
     },
     toggleAll(e) {
