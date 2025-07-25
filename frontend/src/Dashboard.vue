@@ -193,9 +193,7 @@ export default {
 
         if (res.ok) {
           const original = this.alerts.find(
-            (a) =>
-              a.alarm["equipment_id"] === alert.alarm["equipment_id"] &&
-              a.alarm["@timestamp"] === alert.alarm["@timestamp"]
+            (a) => a.alarm["id"] === alert.alarm["id"]
           );
           if (original) original.checked = true; // ✅ alerts 배열에서 직접 수정
         } else {

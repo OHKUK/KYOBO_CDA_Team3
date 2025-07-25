@@ -109,4 +109,4 @@ async def health_check():
 # 웹소켓 서버의 진입 파일 끝에 추가
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=False)
+    uvicorn.run("websocket:app", host="0.0.0.0", port=8001, reload=False)
