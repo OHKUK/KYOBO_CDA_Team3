@@ -132,8 +132,10 @@ export default {
         const res = await axios.post(`${apiUrl}/api/check`, {
           id: alert.id,
         });
+        await this.searchAlerts(); // ✅ 다시 불러오기 (여기 추가!)
+
         if (res.status === 200) {
-          await this.searchAlerts(); // ✅ 최신 데이터 다시 불러오기
+          alert.check = "확인"; // ✅ 상태 직접 갱신
         }
       } catch (err) {
         console.error("❌ 확인 실패:", err);
@@ -163,6 +165,10 @@ export default {
 
         if (res.status === 200) {
           await this.searchAlerts(); // ✅ 성공 시 화면 갱신
+          this.selectedAlerts.forEach((alert) => {
+            alert.check = "확인";
+          });
+          this.selectedAlerts = [];
         }
       } catch (err) {
         console.error("❌ 일괄 확인 실패:", err);
