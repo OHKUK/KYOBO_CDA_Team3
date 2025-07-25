@@ -53,9 +53,7 @@ async def push_log(data: Union[dict, List[Any]]):
 
         for event in events:
             # WebSocket으로 메시지 전송
-            message = json.dumps(event, ensure_ascii=False)
-            for ws in clients:
-                await ws.send_text(message)
+            
             current_status = event.get("status")
             if current_status == "Normal" or current_status == "Warning":
                 print(f"ℹ️ 상태가 '{current_status}' 이므로 DB 저장 건너뜀")
@@ -74,6 +72,16 @@ async def push_log(data: Union[dict, List[Any]]):
             values = (device_id_val, alert_type_val, message_val, detected_at_val, check_val)
             cursor.execute(sql, values)
             saved_count += cursor.rowcount
+            
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            inserted_id = cursor.fetchone()[0]
+            
+            event_with_id = event.copy()
+            event_with_id["id"] = inserted_id
+            
+            message = json.dumps(event_with_id, ensure_ascii=False)
+            for ws in clients:
+                await ws.send_text(message)
 
         conn.commit()
         

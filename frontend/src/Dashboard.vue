@@ -187,8 +187,7 @@ export default {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            device_id: alert.alarm["equipment_id"],
-            timestamp: alert.alarm["@timestamp"],
+            id: alert.alarm["id"],
           }),
         });
 

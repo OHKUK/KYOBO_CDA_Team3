@@ -45,6 +45,7 @@
         <tr>
           <th><input type="checkbox" @change="toggleAll($event)" /></th>
           <!-- ✅ 전체 선택 -->
+          <th>알림 번호</th>
           <th>장비 ID</th>
           <th>알림 종류</th>
           <th>메시지</th>
@@ -64,6 +65,7 @@
             />
             <!-- ✅ 개별 선택 -->
           </td>
+          <td>{{ alert.id }}</td>
           <td>{{ alert.device_id }}</td>
           <td>{{ alert.alert_type }}</td>
           <td>{{ alert.message }}</td>
@@ -127,8 +129,7 @@ export default {
     async markAsChecked(alert) {
       try {
         const res = await axios.post("/api/alerts/check", {
-          device_id: alert.device_id,
-          timestamp: alert.detected_at,
+          id: alert.id,
         });
 
         if (res.status === 200) {
@@ -153,8 +154,7 @@ export default {
     async markSelectedAsChecked() {
       try {
         const payload = this.selectedAlerts.map((a) => ({
-          device_id: a.device_id,
-          timestamp: a.detected_at,
+          id: a.id,
         }));
 
         const res = await axios.post("/api/alerts/bulk-check", payload); // ✅ 서버에 여러 개 전송

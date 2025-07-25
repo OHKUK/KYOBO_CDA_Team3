@@ -135,10 +135,9 @@ def search_alerts():
 @app.route("/api/alerts/check", methods=["POST"])
 def mark_alert_checked():
     data = request.get_json()
-    device_id = data.get("device_id")
-    timestamp = data.get("timestamp")
+    alert_id  = data.get("id")
 
-    if not device_id or not timestamp:
+    if not alert_id:
         return jsonify({"message": "필수 값 누락"}), 400
 
     conn = None
@@ -155,20 +154,10 @@ def mark_alert_checked():
 
         update_sql = """
             UPDATE alerts
-            SET `check` = '확인', checked_at = %s
-            WHERE device_id = %s AND detected_at = %s
+            SET `check` = '확인', checked_at = NOW()
+            WHERE id = %s
         """
-
-        # ISO 형식 타임스탬프 처리 (예: 2024-07-24T12:34:56.000Z)
-        try:
-            if "Z" in timestamp:
-                timestamp = timestamp.replace("Z", "+00:00")
-            dt_obj = datetime.fromisoformat(timestamp)
-        except Exception as e:
-            print(f"❌ timestamp 파싱 실패: {e}")
-            return jsonify({"message": "timestamp 형식 오류"}), 400
-
-        cursor.execute(update_sql, (dt_obj, device_id, dt_obj))
+        cursor.execute(update_sql, (alert_id,))
         conn.commit()
 
         if cursor.rowcount == 0:
@@ -206,28 +195,23 @@ def mark_bulk_alerts_checked():
 
         update_sql = """
             UPDATE alerts
-            SET `check` = '확인', checked_at = %s
-            WHERE device_id = %s AND detected_at = %s
+            SET `check` = '확인', checked_at = NOW()
+            WHERE id = %s
         """
 
         from datetime import datetime
 
         success_count = 0
         for alert in data:
-            device_id = alert.get("device_id")
-            timestamp = alert.get("timestamp")
-
-            if not device_id or not timestamp:
+            alert_id = alert.get("id")
+            if not alert_id:
                 continue
 
             try:
-                if "Z" in timestamp:
-                    timestamp = timestamp.replace("Z", "+00:00")
-                dt_obj = datetime.fromisoformat(timestamp)
-                cursor.execute(update_sql, (dt_obj, device_id, dt_obj))
+                cursor.execute(update_sql, (alert_id,))
                 success_count += cursor.rowcount
             except Exception as e:
-                print(f"❌ 오류 발생 - device_id: {device_id}, timestamp: {timestamp}, error: {e}")
+                print(f"❌ 일괄 확인 처리 중 오류: id={alert_id}, error={e}")
                 continue
 
         conn.commit()
