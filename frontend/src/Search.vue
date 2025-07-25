@@ -114,8 +114,8 @@ export default {
 
         if (this.startDate) params.start_date = this.startDate;
         if (this.endDate) params.end_date = this.endDate;
-
-        const res = await axios.get("/api/alerts", { params });
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const res = await axios.get(`${apiUrl}/api/alerts`, { params });
         this.alerts = res.data;
         this.searched = true;
       } catch (err) {
@@ -128,7 +128,8 @@ export default {
     },
     async markAsChecked(alert) {
       try {
-        const res = await axios.post("/api/alerts/check", {
+        const apiUrl = process.env.VUE_APP_API_URL;
+        const res = await axios.post(`${apiUrl}/api/alerts/check`, {
           id: alert.id,
         });
 
