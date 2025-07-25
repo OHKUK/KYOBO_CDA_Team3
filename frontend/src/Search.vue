@@ -132,9 +132,8 @@ export default {
         const res = await axios.post(`${apiUrl}/api/check`, {
           id: alert.id,
         });
-
         if (res.status === 200) {
-          alert.check = "확인"; // ✅ 상태 직접 갱신
+          await this.searchAlerts(); // ✅ 최신 데이터 다시 불러오기
         }
       } catch (err) {
         console.error("❌ 확인 실패:", err);
@@ -163,11 +162,7 @@ export default {
         const res = await axios.post(`${apiUrl}/alerts/bulk-check`, payload); // ✅ 서버에 여러 개 전송
 
         if (res.status === 200) {
-          // ✅ 성공 시 화면 갱신
-          this.selectedAlerts.forEach((alert) => {
-            alert.check = "확인";
-          });
-          this.selectedAlerts = [];
+          await this.searchAlerts(); // ✅ 성공 시 화면 갱신
         }
       } catch (err) {
         console.error("❌ 일괄 확인 실패:", err);
