@@ -183,7 +183,7 @@ export default {
     async markAsChecked(index, alert) {
       try {
         const apiUrl = process.env.VUE_APP_API_URL;
-        const res = await fetch(`${apiUrl}/check`, {
+        const res = await fetch(`${apiUrl}/api/check`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
