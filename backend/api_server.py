@@ -40,7 +40,7 @@ def receive_and_forward_log():
 
     return jsonify({"message": "Log received and forwarded"}), 200
 
-# <<<--- 로그인 API 추가 시작 --->>>
+# <<<--- 로그인 API 시작 --->>>
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
