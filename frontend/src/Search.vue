@@ -137,11 +137,11 @@ export default {
     formatDate(str) {
       return new Date(str).toLocaleString("ko-KR");
     },
-    async markAsChecked(alert) {
+    async markAsChecked(id) {
       try {
         const apiUrl = process.env.VUE_APP_API_URL;
         const res = await axios.post(`${apiUrl}/api/check`, {
-          id: alert.id,
+          id: id,
         });
         // ✅ 다시 불러오기 (여기 추가!)
         if (res.status === 200) {
