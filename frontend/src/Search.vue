@@ -61,7 +61,7 @@
               type="checkbox"
               :value="alert"
               v-model="selectedAlerts"
-              :disabled="alert.check === '확인'"
+              :disabled="alert.check === '확인' || alert.check === '해결'"
             />
             <!-- ✅ 개별 선택 -->
           </td>
